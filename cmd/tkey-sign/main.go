@@ -5,7 +5,6 @@ package main
 
 import (
 	"bytes"
-	"crypto/ed25519"
 	"crypto/sha512"
 	_ "embed"
 	"encoding/hex"
@@ -17,6 +16,7 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/cloudflare/circl/sign/mldsa/mldsa44"
 	"github.com/spf13/pflag"
 	"github.com/tillitis/tkeyclient"
 	"github.com/tillitis/tkeysign"
