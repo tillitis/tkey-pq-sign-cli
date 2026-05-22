@@ -3,11 +3,14 @@ module github.com/tillitis/tkey-sign-cli
 go 1.23.1
 
 require (
+	github.com/cloudflare/circl v1.6.3 // until go 1.27 is released with mldsa in standard library
 	github.com/spf13/pflag v1.0.5
 	github.com/tillitis/tkeyclient v1.3.1
 	github.com/tillitis/tkeysign v1.0.1
 	github.com/tillitis/tkeyutil v0.0.9
 )
+
+replace github.com/tillitis/tkeysign => ../tkeysign // Custom tkeysign module was needed to adapt to mldsa
 
 require (
 	github.com/ccoveille/go-safecast/v2 v2.0.0 // indirect
