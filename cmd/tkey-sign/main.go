@@ -274,7 +274,7 @@ func usage() {
 %[1]s signs (-S) or verifies (-V) the signature of a message in a
 file. The message will be hashed with SHA-512 and either signed using
 the TKey's private key or verified given the public key. The signing
-algorithm is Ed25519.
+algorithm is ML-DSA-44 (Dilithium2).
 
 Exit status code is 0 if everything went well or non-zero if unsuccessful.
 
