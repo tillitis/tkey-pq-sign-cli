@@ -6,3 +6,4 @@
 /tkey-sign.exe
 
 dist/
+*.code-workspace
