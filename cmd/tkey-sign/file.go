@@ -88,7 +88,7 @@ func writeBase64(filename string, data any, comment string, overwrite bool) erro
 	f, err = os.OpenFile(filename, os.O_RDWR|os.O_CREATE|os.O_EXCL, 0o666)
 	if err != nil {
 		if os.IsExist(err) && overwrite {
-			f, err = os.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0o666)
+			f, err = os.OpenFile(filename, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o666)
 			if err != nil {
 				return fmt.Errorf("%w", err)
 			}
