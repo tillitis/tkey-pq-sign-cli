@@ -51,13 +51,13 @@ var (
 type pubKey struct {
 	Alg    [2]byte
 	KeyNum [8]byte
-	Key    [32]byte
+	Key    [mldsa44.PublicKeySize]byte
 }
 
 type signature struct {
 	Alg    [2]byte
 	KeyNum [8]byte
-	Sig    [64]byte
+	Sig    [mldsa44.SignatureSize]byte
 }
 
 // May be set to non-empty at build time to indicate that the signer
