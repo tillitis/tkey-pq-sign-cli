@@ -76,11 +76,11 @@ func GetEmbeddedAppDigest() string {
 	return hex.EncodeToString(digest[:])
 }
 
-// signFile uses the connection to the signer and produces an Ed25519
+// signFile uses the connection to the signer and produces an ML-DSA-44
 // signature over the file in fileName. It automatically verifies the
 // signature against the provided pubkey.
 //
-// It returns the Ed25519 signature on success or an error.
+// It returns the ML-DSA-44 signature on success or an error.
 func signFile(signer tkeysign.Signer, pubkey []byte, fileName string) (*signature, error) {
 	message, err := os.ReadFile(fileName)
 	if err != nil {
@@ -107,14 +107,18 @@ func signFile(signer tkeysign.Signer, pubkey []byte, fileName string) (*signatur
 		le.Printf("signature: %x", sig)
 	}
 
-	if !ed25519.Verify(pubkey, []byte(fileDigestHex), sig) {
+	var pk mldsa44.PublicKey
+	if err := pk.UnmarshalBinary(pubkey); err != nil {
+		return nil, fmt.Errorf("invalid public key: %w", err)
+	}
+	if !mldsa44.Verify(&pk, []byte(fileDigestHex), nil, sig) {
 		return nil, fmt.Errorf("signature FAILED verification")
 	}
 
 	s := signature{
-		Alg:    [2]byte{'E', 'd'},
+		Alg:    [2]byte{'M', 'L'},
 		KeyNum: [8]byte{1, 7},
-		Sig:    [64]byte{},
+		Sig:    [mldsa44.SignatureSize]byte{},
 	}
 
 	copy(s.Sig[:], sig)
