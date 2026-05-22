@@ -126,7 +126,7 @@ func signFile(signer tkeysign.Signer, pubkey []byte, fileName string) (*signatur
 	return &s, nil
 }
 
-// verifySignature verifies a Ed25519 signature stored in sigFile over
+// verifySignature verifies a ML-DSA-44 signature stored in sigFile over
 // messageFile with public key in pubkeyFile
 func verifySignature(messageFile string, sigFile string, pubkeyFile string) error {
 	signature, err := readSig(sigFile)
@@ -138,17 +138,14 @@ func verifySignature(messageFile string, sigFile string, pubkeyFile string) erro
 		return fmt.Errorf("%w", err)
 	}
 
-	if len(signature.Sig) != 64 {
-		return fmt.Errorf("invalid length of signature. Expected 64 bytes, got %d bytes", len(signature.Sig))
-	}
-
 	pubkey, err := readKey(pubkeyFile)
 	if err != nil {
 		return fmt.Errorf("%w", err)
 	}
 
-	if len(pubkey.Key) != 32 {
-		return fmt.Errorf("invalid length of public key. Expected 32 bytes, got %d bytes", len(pubkey.Key))
+	var pk mldsa44.PublicKey
+	if err := pk.UnmarshalBinary(pubkey.Key[:]); err != nil {
+		return fmt.Errorf("invalid public key: %w", err)
 	}
 
 	message, err := os.ReadFile(messageFile)
@@ -162,7 +159,7 @@ func verifySignature(messageFile string, sigFile string, pubkeyFile string) erro
 		le.Printf("SHA512 hash: %x", digest)
 	}
 
-	if !ed25519.Verify(pubkey.Key[:], []byte(digestHex), signature.Sig[:]) {
+	if !mldsa44.Verify(&pk, []byte(digestHex), nil, signature.Sig[:]) {
 		return fmt.Errorf("signature not valid")
 	}
 
