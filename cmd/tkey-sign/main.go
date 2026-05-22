@@ -390,9 +390,9 @@ func main() {
 		}
 
 		pubkey := pubKey{
-			Alg:    [2]byte{'E', 'd'},
+			Alg:    [2]byte{'M', 'L'},
 			KeyNum: [8]byte{1, 7},
-			Key:    [32]byte{},
+			Key:    [mldsa44.PublicKeySize]byte{},
 		}
 
 		copy(pubkey.Key[:], pub)
