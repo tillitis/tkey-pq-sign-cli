@@ -38,7 +38,7 @@ const (
 //go:embed pqsigner.bin-v1.0.0
 var signerBinary []byte
 
-const appName string = "tkey-device-signer 1.0.0"
+const appName string = "tkey-device-pqsigner 1.0.0"
 
 // Use when printing err/diag msgs
 var le = log.New(os.Stderr, "", 0)
