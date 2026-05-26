@@ -13,7 +13,7 @@ import (
 	"strings"
 
 	"github.com/tillitis/tkeyclient"
-	"github.com/tillitis/tkeysign"
+	"github.com/tillitis/tkeysign-pq"
 )
 
 const (
