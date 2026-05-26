@@ -1,24 +1,24 @@
-tkey-sign(1)
+tkey-sign-pq(1)
 
 # NAME
 
-tkey-sign - Create or verify digital signatures with the Tillitis TKey
+tkey-sign-pq - Create or verify digital signatures with the Tillitis TKey
 
 # SYNOPSIS
 
-*tkey-sign* -h/--help
+*tkey-sign-pq* -h/--help
 
-*tkey-sign* -G/--getkey -p/--public pubkey [-d/--port device] [-f/--force] [-s/--speed speed] [--uss] [--uss-file ussfile] [--force-full-uss] [--verbose]
+*tkey-sign-pq* -G/--getkey -p/--public pubkey [-d/--port device] [-f/--force] [-s/--speed speed] [--uss] [--uss-file ussfile] [--force-full-uss] [--verbose]
 
-*tkey-sign* -S/--sign -m message -p/--public pubkey [-d/--port device] [-f/--force] [-s speed] [--uss] [--uss-file ussfile] [--force-full-uss] [--verbose] [-x sigfile]
+*tkey-sign-pq* -S/--sign -m message -p/--public pubkey [-d/--port device] [-f/--force] [-s speed] [--uss] [--uss-file ussfile] [--force-full-uss] [--verbose] [-x sigfile]
 
-*tkey-sign* -V/--verify -m message -p/--public pubkey [--verbose] [-x sigfile]
+*tkey-sign-pq* -V/--verify -m message -p/--public pubkey [--verbose] [-x sigfile]
 
-*tkey-sign* --version
+*tkey-sign-pq* --version
 
 # DESCRIPTION
 
-*tkey-sign* creates (-S) and verifies (-V) cryptographic signatures of
+*tkey-sign-pq* creates (-S) and verifies (-V) cryptographic signatures of
 files. The signature is created by the *signer* device app running on
 the Tillitis TKey. The signer is automatically loaded into the TKey
 when signing or extracting the public key.
@@ -113,16 +113,16 @@ when signing or extracting the public key.
 Signature files are expected to contain a one-line comment beginning
 with "untrusted comment: ", then encoded in BASE64:
 
-- 2 byte algorithm identifier, so far only "Ed" for Ed25519.
-- 8 byte key number (unused by tkey-sign).
-- 64 byte Ed25519 signature.
+- 2 byte algorithm identifier, so far only "ML" for ML-DSA.
+- 8 byte key number (unused by tkey-sign-pq).
+- 2420 byte ML-DSA-44 signature.
 
 Pubkey files are expected to contain, a one-line comment beginning
 with "untrusted comment: ", then encoded in BASE64:
 
-- 2 byte algorithm identifier, so far only "Ed" for Ed25519.
-- 8 byte key number (unused by tkey-sign).
-- 32 byte Ed25519 public key.
+- 2 byte algorithm identifier, so far only "ML" for ML-DSA.
+- 8 byte key number (unused by tkey-sign-pq).
+- 1312 byte ML-DSA-44 public key.
 
 # EXIT STATUS
 
@@ -180,10 +180,10 @@ already loaded device app.
 
 Store the public key in a file. When loading the device app modify the
 measured identity with a User Supplied Secret. The public key file `key.pub`
-already exists so `tkey-sign` asks if it should replace it.
+already exists so `tkey-sign-pq` asks if it should replace it.
 
 ```
-$ tkey-sign -G -p key.pub --uss
+$ tkey-sign-pq -G -p key.pub --uss
 Enter phrase for the USS:
 Repeat the phrase:
 File key.pub exists. Overwrite [y/n]?
@@ -195,7 +195,7 @@ Sign a file. The program warns that the *signer* device app is already
 loaded, probably from the above command.
 
 ```
-./tkey-sign -S -m message -p key.pub
+./tkey-sign-pq -S -m message -p key.pub
 WARNING: App already loaded.
 $
 ```
@@ -204,7 +204,7 @@ Verify a signature over a message file with the signature in the
 default "message.sig" file:
 
 ```
-$ tkey-sign -V -m message -p key.pub
+$ tkey-sign-pq -V -m message -p key.pub
 Signature verified
 $
 ```
