@@ -1,13 +1,13 @@
 
 [![ci](https://github.com/tillitis/tkey-sign/actions/workflows/ci.yaml/badge.svg?branch=main&event=push)](https://github.com/tillitis/tkey-sign/actions/workflows/ci.yaml)
 
-# tkey-sign
+# tkey-sign-pq
 
-`tkey-sign` creates and verifies cryptographic signatures of files.
+`tkey-sign-pq` creates and verifies cryptographic signatures of files.
 The signature is created by the [signer device
-app](https://github.com/tillitis/tkey-device-signer) running on the
+app](https://github.com/tillitis/tkey-device-pqsigner) running on the
 [Tillitis](https://tillitis.se/) TKey. The signer is automatically
-loaded into the TKey by `tkey-sign` when signing or extracting the
+loaded into the TKey by `tkey-sign-pq` when signing or extracting the
 public key. The measured private key never leaves the TKey.
 
 See [Release notes](RELEASE.md).
@@ -18,18 +18,18 @@ Get a public key, possibly modifying the key pair by using a User
 Supplied Secret, and storing the public key in file `-p pubkey`.
 
 ```
-tkey-sign -G/--getkey [-d/--port device] [-s/--speed speed]
+tkey-sign-pq -G/--getkey [-d/--port device] [-s/--speed speed]
 [--uss] [--uss-file secret-file] -p/--public pubkey
 ```
 
 Sign a file, specified with `-m message`, possibly modifying the
 measured key pair by using a User Supplied Secret, and storing the
 signature in `-x sigfile` or, by default, in `message.sig`. You need
-to supply the public key file as well which `tkey-sign` will
+to supply the public key file as well which `tkey-sign-pq` will
 automatically verify that it's the expected public key.
 
 ```
-tkey-sign -S/--sign [-d/--port device] [-s speed] -m message
+tkey-sign-pq -S/--sign [-d/--port device] [-s speed] -m message
 [--uss] [--uss-file secret-file] -p/--public pubkey [-x sig-file]
 ```
 
@@ -38,19 +38,9 @@ Signature is by default in `message.sig` but can be specified
 with `-x sigfile`. Doesn't need a connected TKey.
 
 ```
-tkey-sign -V/--verify -m message -p/--public pubkey [-x sigfile]
+tkey-sign-pq -V/--verify -m message -p/--public pubkey [-x sigfile]
 ```
 
-Alternatively you can use OpenBSD's *signify(1)* to verify the
-signature but you need to compute the SHA-512 of the file first and
-feed that to the verification. We provide a handy script that does
-this:
-
-```
-signify-verify message pubkey
-```
-
-Exit code is 0 on success and non-zero on failure.
 
 See the manual page for details.
 
@@ -61,7 +51,7 @@ already loaded device app.
 
 Store the public key in a file.
 ```
-$ tkey-sign -G -p key.pub
+$ tkey-sign-pq -G -p key.pub
 ```
 
 Sign a file using the signer's basic secret or the identity of an
@@ -69,30 +59,23 @@ already loaded signer while also checking that you have the right
 public key in a file:
 
 ```
-$ tkey-sign -S -m message.txt -p key.pub
+$ tkey-sign-pq -S -m message.txt -p key.pub
 ```
 
 Verify a signature over a message file with the signature in the
 default "message.txt.sig" file:
 
 ```
-$ tkey-sign -V -p key.pub -m message.txt
+$ tkey-sign-pq -V -p key.pub -m message.txt
 ```
 
-or
-
-```
-$ signify-verify message.txt key.pub
-Signature Verified
-$
-```
 
 ## Build & install
 
 The easiest way is to:
 
 ```
-$ go install github.com/tillitis/tkey-sign-cli/cmd/tkey-sign@latest
+$ go install github.com/tillitis/tkey-sign-cli/cmd/tkey-sign-pq@latest
 ```
 
 After this the `tkey-sign` command should be available in your
@@ -115,7 +98,7 @@ or, for a Windows executable,
 $ make tkey-sign.exe
 ```
 
-should build `tkey-sign`. A pre-compiled signer device app binary is
+should build `tkey-sign-pq`. A pre-compiled signer device app binary is
 included in the repo and will be automatically embedded.
 
 Cross compiling the usual Go way with `GOOS` and `GOARCH` environment
@@ -145,7 +128,7 @@ target. Again, this won't work with a macOS target.
 
 ### Installing on Linux
 
-You can install `tkey-sign` and reload the Linux udev rules to get
+You can install `tkey-sign-pq` and reload the Linux udev rules to get
 access to the TKey with:
 
 ```
