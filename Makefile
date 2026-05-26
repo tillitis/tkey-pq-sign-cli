@@ -8,6 +8,8 @@ else
 	BUILD_CGO_ENABLED ?= 0
 endif
 
+IMAGE=ghcr.io/tillitis/tkey-builder:4
+
 .PHONY: all
 all: check-signer-hash tkey-sign
 
@@ -43,7 +45,7 @@ reload-rules:
 	udevadm trigger
 
 podman:
-	podman run --arch=amd64 --rm --mount type=bind,source=$(CURDIR),target=/src --mount type=bind,source=$(CURDIR)/../tkeysign,target=/tkeysign -w /src -it localhost/tkey-builder-local make -j
+	podman run --arch=amd64 --rm --mount type=bind,source=$(CURDIR),target=/src --mount type=bind,source=$(CURDIR)/../tkeysign,target=/tkeysign -w /src -it $(IMAGE) make -j
 
 TKEY_SIGN_VERSION ?= $(shell git describe --dirty --always | sed -n "s/^v\(.*\)/\1/p")
 # .PHONY to let go-build handle deps and rebuilds
@@ -60,7 +62,7 @@ doc/tkey-sign.1: doc/tkey-sign.scd
 
 .PHONY: check-signer-hash
 check-signer-hash:
-	$(shasum) -c signer.bin.sha512
+	$(shasum) -c pqsigner.bin.sha512
 
 .PHONY: clean
 clean:
