@@ -87,18 +87,11 @@ func signFile(signer tkeysign.Signer, pubkey []byte, fileName string) (*signatur
 		return nil, fmt.Errorf("ReadFile: %w", err)
 	}
 
-	fileDigest := sha512.Sum512(message)
-	fileDigestHex := fmt.Sprintf("%x  %s\n", fileDigest, fileName)
-	if verbose {
-		le.Printf("SHA512 hash: %x", fileDigest)
-		le.Printf("SHA512 hash: %v", fileDigest)
-	}
-
 	if signerAppNoTouch != "" {
 		le.Printf("WARNING! This tkey-sign and signer app is built with the touch requirement removed")
 	}
 
-	sig, err := signer.Sign([]byte(fileDigestHex))
+	sig, err := signer.Sign([]byte(message))
 	if err != nil {
 		return nil, fmt.Errorf("signing failed: %w", err)
 	}
@@ -111,7 +104,7 @@ func signFile(signer tkeysign.Signer, pubkey []byte, fileName string) (*signatur
 	if err := pk.UnmarshalBinary(pubkey); err != nil {
 		return nil, fmt.Errorf("invalid public key: %w", err)
 	}
-	if !mldsa44.Verify(&pk, []byte(fileDigestHex), nil, sig) {
+	if !mldsa44.Verify(&pk, []byte(message), nil, sig) {
 		return nil, fmt.Errorf("signature FAILED verification")
 	}
 
@@ -153,13 +146,7 @@ func verifySignature(messageFile string, sigFile string, pubkeyFile string) erro
 		return fmt.Errorf("could not read %s: %w", messageFile, err)
 	}
 
-	digest := sha512.Sum512(message)
-	digestHex := fmt.Sprintf("%x  %s\n", digest, messageFile)
-	if verbose {
-		le.Printf("SHA512 hash: %x", digest)
-	}
-
-	if !mldsa44.Verify(&pk, []byte(digestHex), nil, signature.Sig[:]) {
+	if !mldsa44.Verify(&pk, []byte(message), nil, signature.Sig[:]) {
 		return fmt.Errorf("signature not valid")
 	}
 
