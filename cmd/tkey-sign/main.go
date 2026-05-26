@@ -35,7 +35,7 @@ const (
 // nolint:typecheck // Avoid lint error when the embedding file is missing.
 // Build copies the built signer here
 //
-//go:embed signer.bin-v1.0.0
+//go:embed pqsigner.bin-v1.0.0
 var signerBinary []byte
 
 const appName string = "tkey-device-signer 1.0.0"
