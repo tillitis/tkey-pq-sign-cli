@@ -19,7 +19,7 @@ import (
 	"github.com/cloudflare/circl/sign/mldsa/mldsa44"
 	"github.com/spf13/pflag"
 	"github.com/tillitis/tkeyclient"
-	"github.com/tillitis/tkeysign"
+	"github.com/tillitis/tkeysign-pq"
 	"github.com/tillitis/tkeyutil"
 )
 
