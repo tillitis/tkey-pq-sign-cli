@@ -21,7 +21,7 @@ const (
 	wantFWName0  = "tk1 "
 	wantFWName1  = "mkdf"
 	wantAppName0 = "tk1 "
-	wantAppName1 = "sign"
+	wantAppName1 = "pqsn"
 )
 
 func isFirmwareMode(tk *tkeyclient.TillitisKey) bool {

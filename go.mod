@@ -10,7 +10,7 @@ require (
 	github.com/tillitis/tkeyutil v0.0.9
 )
 
-replace github.com/tillitis/tkeysign-pq => ../tkeysign-pq // Custom tkeysign module was needed to adapt to mldsa
+replace github.com/tillitis/tkeysign-pq => /tkeysign // Custom tkeysign module was needed to adapt to mldsa
 
 require (
 	github.com/ccoveille/go-safecast/v2 v2.0.0 // indirect
