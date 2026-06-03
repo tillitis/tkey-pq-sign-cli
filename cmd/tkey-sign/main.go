@@ -21,6 +21,7 @@ import (
 	"github.com/tillitis/tkeyclient"
 	"github.com/tillitis/tkeysign-pq"
 	"github.com/tillitis/tkeyutil"
+	"golang.org/x/crypto/sha3"
 )
 
 type command int
@@ -76,9 +77,34 @@ func GetEmbeddedAppDigest() string {
 	return hex.EncodeToString(digest[:])
 }
 
+// computeMu derives the 64-byte message representative mu from the public key
+// and message following FIPS 204 ML-DSA.Sign (Algorithm 2, external-mu variant):
+//
+//	tr = SHAKE256(pk, 64)
+//	mu = SHAKE256(tr || 0x00 || 0x00 || message, 64)
+//
+// The two zero bytes encode format byte 0 (ML-DSA, not HashML-DSA) and an
+// empty context string length.
+func computeMu(pubkey, message []byte) []byte {
+	h := sha3.NewShake256()
+	tr := make([]byte, 64)
+	h.Write(pubkey)
+	h.Read(tr)
+
+	h.Reset()
+	mu := make([]byte, 64)
+	h.Write(tr)
+	h.Write([]byte{0x00, 0x00})
+	h.Write(message)
+	h.Read(mu)
+
+	return mu
+}
+
 // signFile uses the connection to the signer and produces an ML-DSA-44
-// signature over the file in fileName. It automatically verifies the
-// signature against the provided pubkey.
+// signature over the file in fileName. It computes mu from the public key and
+// message locally and sends only the 64-byte mu to the device app, which signs
+// it using mldsa_signature_extmu. It automatically verifies the signature.
 //
 // It returns the ML-DSA-44 signature on success or an error.
 func signFile(signer tkeysign.Signer, pubkey []byte, fileName string) (*signature, error) {
@@ -91,7 +117,13 @@ func signFile(signer tkeysign.Signer, pubkey []byte, fileName string) (*signatur
 		le.Printf("WARNING! This tkey-sign and signer app is built with the touch requirement removed")
 	}
 
-	sig, err := signer.Sign([]byte(message))
+	mu := computeMu(pubkey, message)
+
+	if verbose {
+		le.Printf("mu: %x", mu)
+	}
+
+	sig, err := signer.SignExtMu(mu)
 	if err != nil {
 		return nil, fmt.Errorf("signing failed: %w", err)
 	}
