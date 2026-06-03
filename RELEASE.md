@@ -11,3 +11,4 @@ Migrated from https://github.com/tillitis/tkey-sign-cli and renamed to tkey-sign
 - Depends on updated [tkeysign-pq](https://github.com/tillitis/tkeysign-pq) library
   adapted for ML-DSA-44
 - Embeds [tkey-device-pqsigner v1.0.0](https://github.com/tillitis/tkey-device-pqsigner)
+- Implements external MU computation for messages
