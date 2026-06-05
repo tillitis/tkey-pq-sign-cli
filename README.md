@@ -10,6 +10,17 @@ app](https://github.com/tillitis/tkey-device-pqsigner) running on the
 loaded into the TKey by `tkey-sign-pq` when signing or extracting the
 public key. The measured private key never leaves the TKey.
 
+`tkey-sign-pq` uses MLDSA-Pure and ML-DSA-44 algorithm for signing where
+the T-Key signer device app uses external MU when signing the messages.
+The client will compute the MU value of the message and send to the device-app.
+So no limitation on how big a file can be while still using MLDSA-Pure.
+
+See [ML-DSA draft](https://www.ietf.org/archive/id/draft-connolly-cfrg-ml-dsa-security-considerations-01.html#name-external-mu) about external MU.
+
+At the moment the Go module cloudflare/circl is implement for MLDSA.
+There is a plan to replace this with Go standard module for MLDSA when it is released.
+Planned release of the Go standard module is with release of Go version 1.27 in august 2026.
+
 See [Release notes](RELEASE.md).
 
 ## Usage
