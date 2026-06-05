@@ -17,7 +17,7 @@ So no limitation on how big a file can be while still using MLDSA-Pure.
 
 See [ML-DSA draft](https://www.ietf.org/archive/id/draft-connolly-cfrg-ml-dsa-security-considerations-01.html#name-external-mu) about external MU.
 
-At the moment the Go module cloudflare/circl is implement for MLDSA.
+At the moment the Go module cloudflare/circl is implemented for MLDSA.
 There is a plan to replace this with Go standard module for MLDSA when it is released.
 Planned release of the Go standard module is with release of Go version 1.27 in august 2026.
 
@@ -178,7 +178,7 @@ If you want to replace the signer used you have to:
 
 ## Building the signer
 
-1. See [the Devoloper Handbook](https://dev.tillitis.se/) for setup of
+1. See [the Developer Handbook](https://dev.tillitis.se/) for setup of
    development tools. We recommend you use tkey-builder.
 2. See the instructions in the [tkey-device-signer
    repo](https://github.com/tillitis/tkey-device-signer).
