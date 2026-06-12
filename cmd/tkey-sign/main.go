@@ -19,7 +19,7 @@ import (
 	"github.com/cloudflare/circl/sign/mldsa/mldsa44"
 	"github.com/spf13/pflag"
 	"github.com/tillitis/tkeyclient"
-	"github.com/tillitis/tkeysign-pq"
+	"github.com/tillitis/tkey-pq-device-sign"
 	"github.com/tillitis/tkeyutil"
 )
 
@@ -82,7 +82,7 @@ func GetEmbeddedAppDigest() string {
 // it using mldsa_signature_extmu. It automatically verifies the signature.
 //
 // It returns the ML-DSA-44 signature on success or an error.
-func signFile(signer tkeysign.Signer, pubkey []byte, fileName string) (*signature, error) {
+func signFile(signer tkeypqdevicesign.Signer, pubkey []byte, fileName string) (*signature, error) {
 	message, err := os.ReadFile(fileName)
 	if err != nil {
 		return nil, fmt.Errorf("ReadFile: %w", err)
@@ -167,7 +167,7 @@ func verifySignature(messageFile string, sigFile string, pubkeyFile string) erro
 //
 // It then connects to the running signer and returns an interface to
 // the Signer, the public key, and a possible error.
-func loadSigner(devPath string, speed int, fileUSS string, enterUSS bool, forceFullUss bool) (*tkeysign.Signer, []byte, error) {
+func loadSigner(devPath string, speed int, fileUSS string, enterUSS bool, forceFullUss bool) (*tkeypqdevicesign.Signer, []byte, error) {
 	if !verbose {
 		tkeyclient.SilenceLogging()
 	}
@@ -234,7 +234,7 @@ func loadSigner(devPath string, speed int, fileUSS string, enterUSS bool, forceF
 		}
 	}
 
-	signer := tkeysign.New(tk)
+	signer := tkeypqdevicesign.New(tk)
 
 	handleSignals(func() { os.Exit(1) }, os.Interrupt, syscall.SIGTERM)
 
@@ -286,7 +286,7 @@ func notice() {
 	fmt.Printf(`
 NOTE: Version v1.0.0 and earlier had a vulnerability. Your keys might
 have changed! Read more in the release notes RELEASE.md at
-https://github.com/tillitis/tkey-sign-cli/
+https://github.com/tillitis/tkey-pq-device-signer/
 `)
 	fmt.Printf("--------------------------------------------------------------------------------\n\n")
 }

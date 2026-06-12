@@ -13,7 +13,7 @@ import (
 	"strings"
 
 	"github.com/tillitis/tkeyclient"
-	"github.com/tillitis/tkeysign-pq"
+	"github.com/tillitis/tkey-pq-device-sign"
 )
 
 const (
@@ -34,7 +34,7 @@ func isFirmwareMode(tk *tkeyclient.TillitisKey) bool {
 		nameVer.Name1 == wantFWName1
 }
 
-func isWantedApp(signer tkeysign.Signer) bool {
+func isWantedApp(signer tkeypqdevicesign.Signer) bool {
 	nameVer, err := signer.GetAppNameVersion()
 	if err != nil {
 		if !errors.Is(err, io.EOF) {
