@@ -1,24 +1,24 @@
 
 [![ci](https://github.com/tillitis/tkey-sign/actions/workflows/ci.yaml/badge.svg?branch=main&event=push)](https://github.com/tillitis/tkey-sign/actions/workflows/ci.yaml)
 
-# tkey-sign-pq
+# tkey-pq-sign-cli
 
-`tkey-sign-pq` creates and verifies cryptographic signatures of files.
+`tkey-pq-sign-cli` creates and verifies cryptographic signatures of files.
 The signature is created by the [signer device
 app](https://github.com/tillitis/tkey-device-pqsigner) running on the
 [Tillitis](https://tillitis.se/) TKey. The signer is automatically
-loaded into the TKey by `tkey-sign-pq` when signing or extracting the
+loaded into the TKey by `tkey-pq-sign-cli` when signing or extracting the
 public key. The measured private key never leaves the TKey.
 
-`tkey-sign-pq` uses MLDSA-Pure and ML-DSA-44 algorithm for signing where
-the T-Key signer device app uses external MU when signing the messages.
-The client will compute the MU value of the message and send to the device-app.
-So no limitation on how big a file can be while still using MLDSA-Pure.
+`tkey-pq-sign-cli` uses ML-DSA-Pure and ML-DSA-44 algorithm for signing where
+the T-Key signer device app uses external Mu when signing the messages.
+The client will compute the Mu value of the message and send to the device-app.
+So no limitation on how big a file can be while still using ML-DSA-Pure.
 
-See [ML-DSA draft](https://www.ietf.org/archive/id/draft-connolly-cfrg-ml-dsa-security-considerations-01.html#name-external-mu) about external MU.
+See [ML-DSA draft](https://www.ietf.org/archive/id/draft-connolly-cfrg-ml-dsa-security-considerations-01.html#name-external-mu) about external Mu.
 
-At the moment the Go module cloudflare/circl is implemented for MLDSA.
-There is a plan to replace this with Go standard module for MLDSA when it is released.
+At the moment the Go module cloudflare/circl is implemented for ML-DSA.
+There is a plan to replace this with Go standard module for ML-DSA when it is released.
 Planned release of the Go standard module is with release of Go version 1.27 in august 2026.
 
 See [Release notes](RELEASE.md).
@@ -29,18 +29,18 @@ Get a public key, possibly modifying the key pair by using a User
 Supplied Secret, and storing the public key in file `-p pubkey`.
 
 ```
-tkey-sign-pq -G/--getkey [-d/--port device] [-s/--speed speed]
+tkey-pq-sign-cli -G/--getkey [-d/--port device] [-s/--speed speed]
 [--uss] [--uss-file secret-file] -p/--public pubkey
 ```
 
 Sign a file, specified with `-m message`, possibly modifying the
 measured key pair by using a User Supplied Secret, and storing the
 signature in `-x sigfile` or, by default, in `message.sig`. You need
-to supply the public key file as well which `tkey-sign-pq` will
+to supply the public key file as well which `tkey-pq-sign-cli` will
 automatically verify that it's the expected public key.
 
 ```
-tkey-sign-pq -S/--sign [-d/--port device] [-s speed] -m message
+tkey-pq-sign-cli -S/--sign [-d/--port device] [-s speed] -m message
 [--uss] [--uss-file secret-file] -p/--public pubkey [-x sig-file]
 ```
 
@@ -49,7 +49,7 @@ Signature is by default in `message.sig` but can be specified
 with `-x sigfile`. Doesn't need a connected TKey.
 
 ```
-tkey-sign-pq -V/--verify -m message -p/--public pubkey [-x sigfile]
+tkey-pq-sign-cli -V/--verify -m message -p/--public pubkey [-x sigfile]
 ```
 
 
@@ -62,7 +62,7 @@ already loaded device app.
 
 Store the public key in a file.
 ```
-$ tkey-sign-pq -G -p key.pub
+$ tkey-pq-sign-cli -G -p key.pub
 ```
 
 Sign a file using the signer's basic secret or the identity of an
@@ -70,14 +70,14 @@ already loaded signer while also checking that you have the right
 public key in a file:
 
 ```
-$ tkey-sign-pq -S -m message.txt -p key.pub
+$ tkey-pq-sign-cli -S -m message.txt -p key.pub
 ```
 
 Verify a signature over a message file with the signature in the
 default "message.txt.sig" file:
 
 ```
-$ tkey-sign-pq -V -p key.pub -m message.txt
+$ tkey-pq-sign-cli -V -p key.pub -m message.txt
 ```
 
 
@@ -86,10 +86,10 @@ $ tkey-sign-pq -V -p key.pub -m message.txt
 The easiest way is to:
 
 ```
-$ go install github.com/tillitis/tkey-sign-cli/cmd/tkey-sign-pq@latest
+$ go install github.com/tillitis/tkey-pq-sign-cli/cmd/tkey-pq-sign-cli@latest
 ```
 
-After this the `tkey-sign` command should be available in your
+After this the `tkey-pq-sign-cli` command should be available in your
 `$GOBIN` directory.
 
 Note that this doesn't set the version and other stuff you get if you
@@ -109,7 +109,7 @@ or, for a Windows executable,
 $ make tkey-sign.exe
 ```
 
-should build `tkey-sign-pq`. A pre-compiled signer device app binary is
+should build `tkey-pq-sign-cli`. A pre-compiled signer device app binary is
 included in the repo and will be automatically embedded.
 
 Cross compiling the usual Go way with `GOOS` and `GOARCH` environment
@@ -139,7 +139,7 @@ target. Again, this won't work with a macOS target.
 
 ### Installing on Linux
 
-You can install `tkey-sign-pq` and reload the Linux udev rules to get
+You can install `tkey-pq-sign-cli` and reload the Linux udev rules to get
 access to the TKey with:
 
 ```
@@ -171,7 +171,7 @@ If you want to replace the signer used you have to:
    signer is called, so the agent reports this correctly with
    `--version`.
 4. Compute a new SHA-512 hash digest for your binary, typically by
-   something like `sha512sum cmd/tkey-sign/signer.bin-v0.0.7` and put
+   something like `sha512sum cmd/tkey-sign/pqsigner.bin-v0.0.7` and put
    the resulting output in the file `signer.bin.sha512` at the top
    level.
 5. `make` in the top level.
@@ -180,8 +180,8 @@ If you want to replace the signer used you have to:
 
 1. See [the Developer Handbook](https://dev.tillitis.se/) for setup of
    development tools. We recommend you use tkey-builder.
-2. See the instructions in the [tkey-device-signer
-   repo](https://github.com/tillitis/tkey-device-signer).
+2. See the instructions in the [tkey-pq-device-signer
+   repo](https://github.com/tillitis/tkey-pq-device-signer).
 3. Copy its `signer/app.bin` to
    `cmd/tkey-sign/signer.bin-${signer_version}` and run `make`.
 
