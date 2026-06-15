@@ -1,8 +1,10 @@
 # Release notes
 
-## v1.0.0
+## v0.0.1
 
-Migrated from https://github.com/tillitis/tkey-sign-cli and renamed to tkey-sign-cli-pq
+Migrated from
+[https://github.com/tillitis/tkey-sign-cli](https://github.com/tillitis/tkey-sign-cli)
+and renamed to tkey-pq-sign-cli.
 
 - Upgraded signing algorithm to [ML-DSA-44](https://csrc.nist.gov/pubs/fips/204/final)
   (post-quantum signature scheme, FIPS 204) (uses MLDSA-pure)
