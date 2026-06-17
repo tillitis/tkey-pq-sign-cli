@@ -13,8 +13,8 @@ signature scheme, FIPS 204) (uses MLDSA-pure)
 [github.com/cloudflare/circl](https://github.com/cloudflare/circl) for
 ML-DSA-44 until Go 1.27 ships it in the standard library
 - Depends on updated
-[tkeysign-pq](https://github.com/tillitis/tkey-pq-sign-cli) library
+[tkey-pq-sign](https://github.com/tillitis/tkey-pq-sign) library
 adapted for ML-DSA-44
-- Embeds [tkey-device-pqsigner
-v1.0.0](https://github.com/tillitis/tkey-pq-device-signer)
+- Embeds [tkey-pq-device-signer
+v0.0.1](https://github.com/tillitis/tkey-pq-device-signer)
 - Implements external MU computation for messages
