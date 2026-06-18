@@ -89,7 +89,7 @@ func signFile(signer tkeypqdevicesign.Signer, pubkey []byte, fileName string) (*
 	}
 
 	if signerAppNoTouch != "" {
-		le.Printf("WARNING! This tkey-sign and signer app is built with the touch requirement removed")
+		le.Printf("WARNING! This tkey-pq-sign-cli and signer app is built with the touch requirement removed")
 	}
 
 	mu := signer.ComputeMu(pubkey, message)
@@ -282,7 +282,7 @@ the signer app on the TKey. Specify where to store it with -p key.pub`,
 
 func notice() {
 	fmt.Printf("--------------------------------------------------------------------------------\n")
-	fmt.Printf("tkey-sign %v\n", version)
+	fmt.Printf("tkey-pq-sign-cli %v\n", version)
 	fmt.Printf(`
 NOTE: Version v1.0.0 and earlier had a vulnerability. Your keys might
 have changed! Read more in the release notes RELEASE.md at
@@ -329,7 +329,7 @@ func main() {
 	}
 
 	if *versionOnly {
-		le.Printf("tkey-sign %s\n\n", version)
+		le.Printf("tkey-pq-sign-cli %s\n\n", version)
 		le.Printf("Embedded device app:\n%s\nSHA512: %s\n", GetEmbeddedAppName(), GetEmbeddedAppDigest())
 		os.Exit(0)
 	}

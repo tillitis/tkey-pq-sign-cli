@@ -1,4 +1,4 @@
-module github.com/tillitis/tkey-sign-cli
+module github.com/tillitis/tkey-pq-sign-cli
 
 go 1.23.1
 
