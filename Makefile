@@ -45,7 +45,7 @@ reload-rules:
 	udevadm trigger
 
 podman:
-	podman run --arch=amd64 --rm --mount type=bind,source=$(CURDIR),target=/src --mount type=bind,source=$(CURDIR)/../tkey-pq-device-sign,target=/tkeysign -w /src -it $(IMAGE) make -j
+	podman run --arch=amd64 --rm --mount type=bind,source=$(CURDIR),target=/src --mount type=bind,source=$(CURDIR)/../tkey-pq-device-sign,target=/tkey-pq-device-sign -w /src -it $(IMAGE) make -j
 
 TKEY_SIGN_VERSION ?= $(shell git describe --dirty --always | sed -n "s/^v\(.*\)/\1/p")
 # .PHONY to let go-build handle deps and rebuilds

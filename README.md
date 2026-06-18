@@ -97,6 +97,9 @@ use `make`.
 
 ### Building
 
+To build locally, you must clone the [tkey-pq-device-sign](https://github.com/tillitis/tkey-pq-device-sign)
+repository as a sibling directory to this repository.
+
 If you have Go and make installed, a simple:
 
 ```
