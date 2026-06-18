@@ -51,11 +51,11 @@ TKEY_SIGN_VERSION ?= $(shell git describe --dirty --always | sed -n "s/^v\(.*\)/
 # .PHONY to let go-build handle deps and rebuilds
 .PHONY: tkey-pq-sign-cli
 tkey-pq-sign-cli:
-	CGO_ENABLED=$(BUILD_CGO_ENABLED) go build -ldflags "-w -X main.version=$(TKEY_SIGN_VERSION) -X main.signerAppNoTouch=$(TKEY_SIGNER_APP_NO_TOUCH)  -buildid=" -trimpath -buildvcs=false -o tkey-pq-sign-cli ./cmd/tkey-sign
+	CGO_ENABLED=$(BUILD_CGO_ENABLED) go build -ldflags "-w -X main.version=$(TKEY_SIGN_VERSION) -X main.signerAppNoTouch=$(TKEY_SIGNER_APP_NO_TOUCH)  -buildid=" -trimpath -buildvcs=false -o tkey-pq-sign-cli ./cmd/tkey-pq-sign-cli
 
 .PHONY: tkey-pq-sign-cli.exe
 tkey-pq-sign-cli.exe:
-	GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "-w -X main.version=$(TKEY_SIGN_VERSION) -X main.signerAppNoTouch=$(TKEY_SIGNER_APP_NO_TOUCH)  -buildid=" -trimpath -o tkey-pq-sign-cli.exe ./cmd/tkey-sign
+	GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -ldflags "-w -X main.version=$(TKEY_SIGN_VERSION) -X main.signerAppNoTouch=$(TKEY_SIGNER_APP_NO_TOUCH)  -buildid=" -trimpath -o tkey-pq-sign-cli.exe ./cmd/tkey-pq-sign-cli
 
 doc/tkey-pq-sign-cli.1: doc/tkey-pq-sign-cli.scd
 	scdoc < $^ > $@

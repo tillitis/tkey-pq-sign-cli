@@ -1,5 +1,5 @@
-source = ["dist/tkey-sign-cli_darwin_all/tkey-sign"]
-bundle_id = "com.tillitis.tkey-sign"
+source = ["dist/tkey-pq-sign-cli_darwin_all/tkey-pq-sign-cli"]
+bundle_id = "com.tillitis.tkey-pq-sign-cli"
 
 apple_id {
   username = "[email protected]"

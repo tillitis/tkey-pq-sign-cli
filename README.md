@@ -1,5 +1,4 @@
 
-[![ci](https://github.com/tillitis/tkey-sign/actions/workflows/ci.yaml/badge.svg?branch=main&event=push)](https://github.com/tillitis/tkey-sign/actions/workflows/ci.yaml)
 
 # tkey-pq-sign-cli
 
@@ -106,7 +105,7 @@ $ make
 or, for a Windows executable,
 
 ```
-$ make tkey-sign.exe
+$ make tkey-pq-sign-cli.exe
 ```
 
 should build `tkey-pq-sign-cli`. A pre-compiled signer device app binary is
@@ -154,24 +153,24 @@ release binaries if you use the same Go compiler, at least for the
 statically linked Linux and Windows binaries.
 
 Please see [the official
-releases](https://github.com/tillitis/tkey-sign-cli/releases) for
+releases](https://github.com/tillitis/tkey-pq-sign-cli/releases) for
 digests and details about the build environment.
 
 ### Building with another signer
 
 For convenience, and to be able to support `go install` the signer
-device app binary is included in `cmd/tkey-sign`.
+device app binary is included in `cmd/tkey-pq-sign-cli`.
 
 If you want to replace the signer used you have to:
 
-1. Compile your own signer and place it in `cmd/tkey-sign`.
-2. Change the path to the embedded signer in `cmd/tkey-sign/main.go`.
+1. Compile your own signer and place it in `cmd/tkey-pq-sign-cli`.
+2. Change the path to the embedded signer in `cmd/tkey-pq-sign-cli/main.go`.
    Look for `go:embed...`.
 3. Change the `appName` directly under the `go:embed` to whatever your
    signer is called, so the agent reports this correctly with
    `--version`.
 4. Compute a new SHA-512 hash digest for your binary, typically by
-   something like `sha512sum cmd/tkey-sign/pqsigner.bin-v0.0.7` and put
+   something like `sha512sum cmd/tkey-pq-sign-cli/pqsigner.bin-v0.0.7` and put
    the resulting output in the file `signer.bin.sha512` at the top
    level.
 5. `make` in the top level.
@@ -183,7 +182,7 @@ If you want to replace the signer used you have to:
 2. See the instructions in the [tkey-pq-device-signer
    repo](https://github.com/tillitis/tkey-pq-device-signer).
 3. Copy its `signer/app.bin` to
-   `cmd/tkey-sign/signer.bin-${signer_version}` and run `make`.
+   `cmd/tkey-pq-sign-cli/signer.bin-${signer_version}` and run `make`.
 
 To help prevent unpleasant surprises we keep a digest of the signer in
 `cmd/tkey-ssh-agent/signer.bin.sha512`. The compilation will fail if
