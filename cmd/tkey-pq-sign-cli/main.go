@@ -280,17 +280,6 @@ the signer app on the TKey. Specify where to store it with -p key.pub`,
 		pflag.CommandLine.FlagUsagesWrapped(86))
 }
 
-func notice() {
-	fmt.Printf("--------------------------------------------------------------------------------\n")
-	fmt.Printf("tkey-pq-sign-cli %v\n", version)
-	fmt.Printf(`
-NOTE: Version v1.0.0 and earlier had a vulnerability. Your keys might
-have changed! Read more in the release notes RELEASE.md at
-https://github.com/tillitis/tkey-pq-device-signer/
-`)
-	fmt.Printf("--------------------------------------------------------------------------------\n\n")
-}
-
 func main() {
 	var cmd command
 	var cmdArgs int
@@ -315,8 +304,6 @@ func main() {
 	if version == "" {
 		version = readBuildInfo()
 	}
-
-	notice()
 
 	pflag.BoolVar(&verbose, "verbose", false, "Enable verbose output.")
 	pflag.Usage = usage
