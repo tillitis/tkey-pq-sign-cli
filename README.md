@@ -3,8 +3,8 @@
 # tkey-pq-sign-cli
 
 `tkey-pq-sign-cli` creates and verifies cryptographic signatures of files.
-The signature is created by the [signer device
-app](https://github.com/tillitis/tkey-device-pqsigner) running on the
+The signature is created by the [PQ signer device
+app](https://github.com/tillitis/tkey-pq-device-signer) running on the
 [Tillitis](https://tillitis.se/) TKey. The signer is automatically
 loaded into the TKey by `tkey-pq-sign-cli` when signing or extracting the
 public key. The measured private key never leaves the TKey.
