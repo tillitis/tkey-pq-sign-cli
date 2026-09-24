@@ -18,8 +18,8 @@ import (
 
 	"github.com/cloudflare/circl/sign/mldsa/mldsa44"
 	"github.com/spf13/pflag"
+	tkeypqdevicesign "github.com/tillitis/tkey-pq-device-sign"
 	"github.com/tillitis/tkeyclient"
-	"github.com/tillitis/tkey-pq-device-sign"
 	"github.com/tillitis/tkeyutil"
 )
 
@@ -144,7 +144,8 @@ func verifySignature(messageFile string, sigFile string, pubkeyFile string) erro
 	}
 
 	var pk mldsa44.PublicKey
-	if err := pk.UnmarshalBinary(pubkey.Key[:]); err != nil {
+	err = pk.UnmarshalBinary(pubkey.Key[:])
+	if err != nil {
 		return fmt.Errorf("invalid public key: %w", err)
 	}
 
