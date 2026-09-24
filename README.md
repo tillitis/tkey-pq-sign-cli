@@ -16,10 +16,6 @@ So no limitation on how big a file can be while still using ML-DSA-Pure.
 
 See [ML-DSA draft](https://www.ietf.org/archive/id/draft-connolly-cfrg-ml-dsa-security-considerations-01.html#name-external-mu) about external Mu.
 
-At the moment the Go module cloudflare/circl is implemented for ML-DSA.
-There is a plan to replace this with Go standard module for ML-DSA when it is released.
-Planned release of the Go standard module is with release of Go version 1.27 in august 2026.
-
 See [Release notes](RELEASE.md).
 
 ## Usage

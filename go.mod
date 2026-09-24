@@ -5,7 +5,6 @@ go 1.27.0
 replace github.com/tillitis/tkey-pq-device-sign => ../tkey-pq-device-sign // Custom tkeysign module was needed to adapt to mldsa
 
 require (
-	github.com/cloudflare/circl v1.6.3 // until go 1.27 is released with mldsa in standard library
 	github.com/spf13/pflag v1.0.5
 	github.com/tillitis/tkey-pq-device-sign v1.0.0
 	github.com/tillitis/tkeyclient v1.3.1

@@ -5,6 +5,7 @@ package main
 
 import (
 	"bytes"
+	"crypto/mldsa"
 	"crypto/sha512"
 	_ "embed"
 	"encoding/hex"
@@ -16,7 +17,6 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/cloudflare/circl/sign/mldsa/mldsa44"
 	"github.com/spf13/pflag"
 	tkeypqdevicesign "github.com/tillitis/tkey-pq-device-sign"
 	"github.com/tillitis/tkeyclient"
@@ -51,13 +51,13 @@ var (
 type pubKey struct {
 	Alg    [2]byte
 	KeyNum [8]byte
-	Key    [mldsa44.PublicKeySize]byte
+	Key    [mldsa.MLDSA44PublicKeySize]byte
 }
 
 type signature struct {
 	Alg    [2]byte
 	KeyNum [8]byte
-	Sig    [mldsa44.SignatureSize]byte
+	Sig    [mldsa.MLDSA44SignatureSize]byte
 }
 
 // May be set to non-empty at build time to indicate that the signer
@@ -107,18 +107,18 @@ func signFile(signer tkeypqdevicesign.Signer, pubkey []byte, fileName string) (*
 		le.Printf("signature: %x", sig)
 	}
 
-	var pk mldsa44.PublicKey
-	if err := pk.UnmarshalBinary(pubkey); err != nil {
+	pk, err := mldsa.NewPublicKey(mldsa.MLDSA44(), pubkey)
+	if err != nil {
 		return nil, fmt.Errorf("invalid public key: %w", err)
 	}
-	if !mldsa44.Verify(&pk, []byte(message), nil, sig) {
-		return nil, fmt.Errorf("signature FAILED verification")
+	if err := mldsa.Verify(pk, message, sig, nil); err != nil {
+		return nil, fmt.Errorf("signature FAILED verification: %w", err)
 	}
 
 	s := signature{
 		Alg:    [2]byte{'M', 'L'},
 		KeyNum: [8]byte{1, 7},
-		Sig:    [mldsa44.SignatureSize]byte{},
+		Sig:    [mldsa.MLDSA44SignatureSize]byte{},
 	}
 
 	copy(s.Sig[:], sig)
@@ -143,8 +143,7 @@ func verifySignature(messageFile string, sigFile string, pubkeyFile string) erro
 		return fmt.Errorf("%w", err)
 	}
 
-	var pk mldsa44.PublicKey
-	err = pk.UnmarshalBinary(pubkey.Key[:])
+	pk, err := mldsa.NewPublicKey(mldsa.MLDSA44(), pubkey.Key[:])
 	if err != nil {
 		return fmt.Errorf("invalid public key: %w", err)
 	}
@@ -154,8 +153,8 @@ func verifySignature(messageFile string, sigFile string, pubkeyFile string) erro
 		return fmt.Errorf("could not read %s: %w", messageFile, err)
 	}
 
-	if !mldsa44.Verify(&pk, []byte(message), nil, signature.Sig[:]) {
-		return fmt.Errorf("signature not valid")
+	if err := mldsa.Verify(pk, message, signature.Sig[:], nil); err != nil {
+		return fmt.Errorf("signature not valid: %w", err)
 	}
 
 	return nil
@@ -387,7 +386,7 @@ func main() {
 		pubkey := pubKey{
 			Alg:    [2]byte{'M', 'L'},
 			KeyNum: [8]byte{1, 7},
-			Key:    [mldsa44.PublicKeySize]byte{},
+			Key:    [mldsa.MLDSA44PublicKeySize]byte{},
 		}
 
 		copy(pubkey.Key[:], pub)
