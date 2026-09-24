@@ -12,8 +12,8 @@ import (
 	"runtime/debug"
 	"strings"
 
+	tkeypqdevicesign "github.com/tillitis/tkey-pq-device-sign"
 	"github.com/tillitis/tkeyclient"
-	"github.com/tillitis/tkey-pq-device-sign"
 )
 
 const (
