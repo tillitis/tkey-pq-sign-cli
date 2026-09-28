@@ -15,6 +15,7 @@ import (
 	"os"
 	"strings"
 	"syscall"
+	"time"
 
 	"github.com/cloudflare/circl/sign/mldsa/mldsa44"
 	"github.com/spf13/pflag"
@@ -30,6 +31,7 @@ const (
 	cmdGetKey
 	cmdSign
 	cmdVerify
+	cmdReset
 )
 
 // nolint:typecheck // Avoid lint error when the embedding file is missing.
@@ -180,11 +182,6 @@ func loadSigner(devPath string, speed int, fileUSS string, enterUSS bool, forceF
 		}
 	}
 
-	tk := tkeyclient.New()
-	if verbose {
-		le.Printf("Connecting to TKey on serial port %s ...", devPath)
-	}
-
 	options := []func(*tkeyclient.TillitisKey){}
 
 	if speed != 0 {
@@ -195,42 +192,105 @@ func loadSigner(devPath string, speed int, fileUSS string, enterUSS bool, forceF
 		options = append(options, tkeyclient.WithFullUss())
 	}
 
-	if err := tk.Connect(devPath, options...); err != nil {
-		return nil, nil, fmt.Errorf("could not open %s: %w", devPath, err)
+	connect := func() (*tkeyclient.TillitisKey, error) {
+		tk := tkeyclient.New()
+		if verbose {
+			le.Printf("Connecting to TKey on serial port %s ...", devPath)
+		}
+		if err := tk.Connect(devPath, options...); err != nil {
+			return nil, fmt.Errorf("could not open %s: %w", devPath, err)
+		}
+		return tk, nil
 	}
 
-	if isFirmwareMode(tk) {
+	tk, err := connect()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	loadApp := func(tk *tkeyclient.TillitisKey) error {
 		var secret []byte
 		var err error
 
 		if enterUSS {
 			secret, err = tkeyutil.InputUSS()
 			if err != nil {
-				tk.Close()
-				return nil, nil, fmt.Errorf("InputUSS: %w", err)
+				return fmt.Errorf("InputUSS: %w", err)
 			}
 		}
 		if fileUSS != "" {
 			secret, err = tkeyutil.ReadUSS(fileUSS)
 			if err != nil {
-				tk.Close()
-				return nil, nil, fmt.Errorf("ReadUSS: %w", err)
+				return fmt.Errorf("ReadUSS: %w", err)
 			}
 		}
 
 		if err := tk.LoadApp(signerBinary, secret); err != nil {
-			tk.Close()
-			return nil, nil, fmt.Errorf("couldn't load signer: %w", err)
+			return fmt.Errorf("couldn't load signer: %w", err)
 		}
 
 		if verbose {
 			le.Printf("Signer app loaded.")
 		}
-	} else {
+		return nil
+	}
+
+	switch {
+	case isFirmwareMode(tk):
+		if err := loadApp(tk); err != nil {
+			tk.Close()
+			return nil, nil, err
+		}
+
+	case isWantedApp(tkeypqdevicesign.New(tk)):
 		if enterUSS || fileUSS != "" {
 			le.Printf("WARNING: App already loaded, your USS won't be used.")
+		}
+
+	default:
+		// Neither raw firmware nor our signer app answered, so a
+		// different app is presumably running (e.g. tkey-fido2).
+		// Ask it to reset into client mode using the standardized
+		// reset command, then load the signer fresh. This only
+		// works against apps that implement that command.
+		le.Printf("A different app appears to be running; resetting TKey to load the signer app.")
+
+		// A real USB reset causes the TKey to disconnect and
+		// re-enumerate, which takes a variable amount of time and may
+		// even change its device path. Record its USB serial number
+		// first so we can find it again by identity rather than by
+		// path. This only works for real USB serial ports; it fails
+		// for other kinds of serial paths (for example a test
+		// harness's plain pty), in which case we fall back to a
+		// short fixed wait on the same path.
+		serialNumber, snErr := serialNumberByPath(devPath)
+
+		if err := tkeypqdevicesign.New(tk).SendReset(tkeypqdevicesign.ResetTypeStartClient); err != nil {
+			tk.Close()
+			return nil, nil, fmt.Errorf("couldn't reset TKey: %w", err)
+		}
+		tk.Close()
+
+		const resetTimeout = 10 * time.Second
+
+		if snErr == nil {
+			tk, err = reconnectBySerialNumber(serialNumber, options, resetTimeout)
 		} else {
-			le.Printf("WARNING: App already loaded.")
+			time.Sleep(1 * time.Second)
+			tk, err = connect()
+		}
+		if err != nil {
+			return nil, nil, fmt.Errorf("could not reopen TKey after reset: %w", err)
+		}
+
+		if !isFirmwareMode(tk) {
+			tk.Close()
+			return nil, nil, fmt.Errorf("TKey did not return to firmware mode after reset; it may be running an app that doesn't support the standardized reset command")
+		}
+
+		if err := loadApp(tk); err != nil {
+			tk.Close()
+			return nil, nil, err
 		}
 	}
 
@@ -252,6 +312,52 @@ func loadSigner(devPath string, speed int, fileUSS string, enterUSS bool, forceF
 	return &signer, pubkey, nil
 }
 
+// resetTKey connects to the TKey and, if a device app is currently
+// running, asks it to reset the TKey into its default boot path
+// (flash slot 0, typically a verified boot loader), handing control
+// back to whatever is normally installed. This only works against
+// apps that implement the standardized reset command; if the TKey is
+// already sitting in firmware mode waiting for a client to load an
+// app, there is nothing running to ask, and this is an error.
+func resetTKey(devPath string, speed int) error {
+	if !verbose {
+		tkeyclient.SilenceLogging()
+	}
+
+	if devPath == "" {
+		var err error
+		devPath, err = tkeyclient.DetectSerialPort(false)
+		if err != nil {
+			return fmt.Errorf("DetectSerialPort: %w", err)
+		}
+	}
+
+	tk := tkeyclient.New()
+	if verbose {
+		le.Printf("Connecting to TKey on serial port %s ...", devPath)
+	}
+
+	options := []func(*tkeyclient.TillitisKey){}
+	if speed != 0 {
+		options = append(options, tkeyclient.WithSpeed(speed))
+	}
+
+	if err := tk.Connect(devPath, options...); err != nil {
+		return fmt.Errorf("could not open %s: %w", devPath, err)
+	}
+	defer tk.Close()
+
+	if isFirmwareMode(tk) {
+		return fmt.Errorf("TKey is waiting for an app to be loaded; nothing running to reset")
+	}
+
+	if err := tkeypqdevicesign.New(tk).SendReset(tkeypqdevicesign.ResetTypeStartDefault); err != nil {
+		return fmt.Errorf("couldn't reset TKey: %w", err)
+	}
+
+	return nil
+}
+
 func usage() {
 	desc := fmt.Sprintf(`Usage:
 
@@ -263,6 +369,8 @@ func usage() {
 
 %[1]s -V/--verify -m message -p/--public pubkey [-x sigfile]
 
+%[1]s -r/--reset [-d/--port device] [-s/--speed speed] [--verbose]
+
 %[1]s --version
 
 %[1]s signs (-S) or verifies (-V) the signature of a message in a
@@ -273,7 +381,13 @@ algorithm is ML-DSA-44 (Dilithium2).
 Exit status code is 0 if everything went well or non-zero if unsuccessful.
 
 Alternatively, -G/--getkey can be used to receive the public key of
-the signer app on the TKey. Specify where to store it with -p key.pub`,
+the signer app on the TKey. Specify where to store it with -p key.pub
+
+On a Castor TKey, -r/--reset asks whatever device app is currently
+running (the signer or another app such as tkey-fido2) to reset the
+TKey back to its default boot path, handing control back to whatever
+is normally installed in flash. This only works against apps that
+implement the standardized reset command.`,
 		os.Args[0])
 
 	le.Printf("%s\n\n%s", desc,
@@ -283,11 +397,6 @@ the signer app on the TKey. Specify where to store it with -p key.pub`,
 func notice() {
 	fmt.Printf("--------------------------------------------------------------------------------\n")
 	fmt.Printf("tkey-pq-sign-cli %v\n", version)
-	fmt.Printf(`
-NOTE: Version v1.0.0 and earlier had a vulnerability. Your keys might
-have changed! Read more in the release notes RELEASE.md at
-https://github.com/tillitis/tkey-pq-device-signer/
-`)
 	fmt.Printf("--------------------------------------------------------------------------------\n\n")
 }
 
@@ -297,6 +406,7 @@ func main() {
 	getKey := pflag.BoolP("getkey", "G", false, "Get public key.")
 	sign := pflag.BoolP("sign", "S", false, "Sign the message.")
 	verify := pflag.BoolP("verify", "V", false, "Verify signature of the message.")
+	doReset := pflag.BoolP("reset", "r", false, "Reset the TKey back to its default boot path (Castor only).")
 	force := pflag.BoolP("force", "f", false, "Force writing of signature and pubkey files, overwriting any existing files.")
 	keyFile := pflag.StringP("public", "p", "", "Public key `pubkey`.")
 	sigFile := pflag.StringP("sig", "x", "", "Signature `sigfile`.")
@@ -352,6 +462,11 @@ func main() {
 
 	if *verify {
 		cmd = cmdVerify
+		cmdArgs++
+	}
+
+	if *doReset {
+		cmd = cmdReset
 		cmdArgs++
 	}
 
@@ -491,6 +606,13 @@ func main() {
 			os.Exit(1)
 		}
 		le.Printf("Signature verified")
+
+	case cmdReset:
+		if err := resetTKey(*devPath, *speed); err != nil {
+			le.Printf("Couldn't reset TKey: %v", err)
+			os.Exit(1)
+		}
+		le.Printf("TKey reset.")
 
 	default:
 		pflag.Usage()

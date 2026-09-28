@@ -11,6 +11,7 @@ import (
 	"os/signal"
 	"runtime/debug"
 	"strings"
+	"time"
 
 	"github.com/tillitis/tkeyclient"
 	"github.com/tillitis/tkey-pq-device-sign"
@@ -46,6 +47,68 @@ func isWantedApp(signer tkeypqdevicesign.Signer) bool {
 	// not caring about nameVer.Version
 	return nameVer.Name0 == wantAppName0 &&
 		nameVer.Name1 == wantAppName1
+}
+
+// serialNumberByPath returns the USB serial number of the TKey
+// currently enumerated at devPath. It only recognizes real USB serial
+// ports; callers use a non-nil error as the signal that devPath is
+// some other kind of serial path (for example a test harness's plain
+// pty) that won't survive a USB-level reset the same way.
+func serialNumberByPath(devPath string) (string, error) {
+	ports, err := tkeyclient.GetSerialPorts()
+	if err != nil {
+		return "", fmt.Errorf("GetSerialPorts: %w", err)
+	}
+
+	for _, port := range ports {
+		if port.DevPath == devPath {
+			return port.SerialNumber, nil
+		}
+	}
+
+	return "", fmt.Errorf("%s not found among USB serial ports", devPath)
+}
+
+// reconnectBySerialNumber waits for a TKey with the given USB serial
+// number to reappear -- its device path may change across a reset --
+// and connects to it, retrying transient errors such as the port
+// briefly being busy right after re-enumeration. It gives up once
+// timeout has elapsed since the call started.
+func reconnectBySerialNumber(serialNumber string, options []func(*tkeyclient.TillitisKey), timeout time.Duration) (*tkeyclient.TillitisKey, error) {
+	const retryDelay = 100 * time.Millisecond
+	deadline := time.Now().Add(timeout)
+
+	var devPath string
+	for devPath == "" {
+		ports, err := tkeyclient.GetSerialPorts()
+		if err == nil {
+			for _, port := range ports {
+				if port.SerialNumber == serialNumber {
+					devPath = port.DevPath
+					break
+				}
+			}
+		}
+		if devPath != "" {
+			break
+		}
+		if time.Now().After(deadline) {
+			return nil, fmt.Errorf("TKey with serial number %s did not reappear", serialNumber)
+		}
+		time.Sleep(retryDelay)
+	}
+
+	for {
+		tk := tkeyclient.New()
+		err := tk.Connect(devPath, options...)
+		if err == nil {
+			return tk, nil
+		}
+		if time.Now().After(deadline) {
+			return nil, fmt.Errorf("could not open %s: %w", devPath, err)
+		}
+		time.Sleep(retryDelay)
+	}
 }
 
 func handleSignals(action func(), sig ...os.Signal) {
