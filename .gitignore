@@ -2,8 +2,15 @@
 *.o
 *.bin
 *.elf
-/tkey-sign
 /tkey-sign.exe
+
+*.txt.sig
+*.key
+*.pub
+*.txt
+
+tkey-pq-sign-cli
+tkey-pq-sign-cli.exe
 
 dist/
 *.code-workspace
