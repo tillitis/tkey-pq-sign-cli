@@ -1,24 +1,46 @@
 
-
 # tkey-pq-sign-cli
 
-> **`castor-support-demo` branch:** adds automatic reset-and-reclaim of a
-> Castor TKey that's running a different app (e.g. `tkey-fido2`), so
-> the signer can be loaded over USB without unplugging the TKey, plus a
-> new `-r`/`--reset` option to hand the TKey back to its default boot
-> path afterwards. Build as usual (see [Build &
-> install](#build--install)), but check out the `castor-support-demo`
-> branch of the sibling
+> ℹ️ This branch is for demo purpose.
+>
+>        Castor platform components:
+>        - tillitis-key1, tag TK1-Q-beta-1
+>        - tkey-boot-verifier, TK1-Q-beta-1
+>
+>        - Test on qemu or target: TKeyQ pilot series
+>
+>        Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+>
+> **`castor-support-demo` branch:** adds automatic reset-and-reclaim
+> of a Castor TKey that's running a different app (e.g. `tkey-fido2`),
+> so the signer can be loaded over USB without unplugging the TKey,
+> plus a new `-r`/`--reset` option to hand the TKey back to its
+> default boot path afterwards.
+>
+> Build as usual (see [Build & install](#build--install)), but check
+> out the `castor-support-demo` branch of the sibling
 > [tkey-pq-device-sign](https://github.com/tillitis/tkey-pq-device-sign)
-> repo too, since that's where the reset support lives. For `-r` to
-> work against the signer app itself (not just other apps like
-> `tkey-fido2`), the embedded signer also needs rebuilding from
+> repo too, since that's where the reset support lives.
+>
+> For `-r` to work against the signer app itself (not just other apps
+> like `tkey-fido2`), the embedded signer also needs rebuilding from
 > [tkey-pq-device-signer](https://github.com/tillitis/tkey-pq-device-signer)'s
 > `castor-support-demo` branch (requires tkey-libs `TK1-Q-beta-1`,
 > fetched automatically by its build scripts); see [Building with
-> another signer](#building-with-another-signer). Test against a real
-> Castor TKey or the `tk1-castor` QEMU machine. This branch is for demo
-> purpose.
+> another signer](#building-with-another-signer).
+>
+> Test against a real Castor TKey or the `tk1-castor` QEMU machine.
+>
+> Try:
+>
+> ```bash
+> # Insert TKeyQ, which will boot into the installed FIDO2
+> echo "Castor message" >> msg.txt # Create message
+> tkey-pq-sign-cli -G -p castor.key --uss # Get public key, use uss
+> tkey-pq-sign-cli -S -p castor.key -m msg.txt # Sign message
+> tkey-pq-sign-cli -V -p castor.key # Verify signature
+> tkey-pq-sign-cli -r # Reset TKeyQ, which will boot into FIDO2
+> ```
 
 `tkey-pq-sign-cli` creates and verifies cryptographic signatures of files.
 The signature is created by the [signer device
